@@ -1,0 +1,8 @@
+I'm working fine... 
+
+
+Starting run: pantheon_only_fixedM with 35000 steps... [31-08-2025 14:23:40]
+/usr/local/lib/python3.9/site-packages/emcee/moves/red_blue.py:99: RuntimeWarning: invalid value encountered in scalar subtract
+  lnpdiff = f + nlp - state.log_prob[j]
+pantheon_only_fixedM: step 1000/35000 completed [31-08-2025 14:29:35]
+pantheon_only_fixedM: step 2000/35000 completed [31-08-2025 14:38:12]

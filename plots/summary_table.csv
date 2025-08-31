@@ -1,0 +1,4 @@
+Run,Acceptance,Rhat(Omega_m),ESS(Omega_m),tau(Omega_m),Omega_m_median,Omega_m_+err,Omega_m_-err,Rhat(h),ESS(h),tau(h),h_median,h_+err,h_-err,Rhat(M),ESS(M),tau(M),M_median,M_+err,M_-err
+pantheon_only_fixedM,0.53,1.00,78104.05,13.44,0.33,0.02,0.02,1.00,80498.58,13.04,0.71,0.00,0.00,nan,nan,nan,nan,nan,nan
+pantheon_plus_bao_fixedM,0.49,1.09,188.62,5566.63,0.27,0.01,0.01,1.09,188.12,5581.64,0.71,0.00,0.00,nan,nan,nan,nan,nan,nan
+joint_bao_h0_varyM,0.44,1.10,161.73,5509.19,0.27,0.01,0.01,1.10,160.45,5553.03,0.72,0.01,0.01,1.10,160.61,5547.75,-19.29,0.03,0.02
