@@ -1,0 +1,46 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+
+# Output files
+output/
+*.npy
+*.npz
+*.txt
+*.dat
+*.json
+*.log
+
+# Plots / figures
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+*.csv
+*.html
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Mac/Unix cruft
+.DS_Store
+*.swp
+
+# Compiled / build files
+*.so
+*.o
+*.out
+*.a
+
+# IDE / editor configs
+.vscode/
+.idea/
+*.code-workspace
