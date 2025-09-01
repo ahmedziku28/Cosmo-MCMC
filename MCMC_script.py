@@ -21,22 +21,88 @@ z_bao, obs_q, obs_val, inv_cov = load_desi(
 outdir = 'output'
 os.makedirs(outdir, exist_ok=True)
 
-RANDOS = np.arange(0.66666667, 30.0, 0.333333334)
 
-perturbation = np.arange(3 , 15, 0.75)
 h_calc, h_err = 0.7304, 0.0104  #Reiss' paper
 
 
 # ---------- Helpers ----------
-def prepare_initial_pos(initial, ndim, nwalkers):
-    """Generate jittered starting positions around `initial`."""
-    random.shuffle(RANDOS)
+
+def prepare_initial_pos(initial, ndim, nwalkers, *,
+                                scale_frac=0.045,
+                                min_std=1.75e-4,
+                                param_bounds=None,
+                                seed=None):
+    """
+    Simple, easy-to-read initialization for ensemble walkers.
+
+    Parameters
+    ----------
+    initial : array-like length ndim
+        Central starting point (best guess).
+    ndim : int
+        Number of parameters (must equal len(initial)).
+    nwalkers : int
+        Number of walkers to create.
+    scale_frac : float
+        Jitter = scale_frac * max(|initial|, 1.0). For example, 0.02 -> 2%.
+    min_std : float
+        Minimum standard deviation so jitter isn't zero for tiny or zero params.
+    param_bounds : sequence of (min, max) or None
+        If provided, final positions are clipped to these bounds.
+    seed : int or None
+        RNG seed for reproducibility.
+
+    Returns
+    -------
+    p0 : ndarray shape (nwalkers, ndim)
+        Initial walker positions.
+    """
     
-    random.shuffle(perturbation)
-    pert = random.choice(perturbation)
+    rng = np.random.default_rng(seed)
+
     
-    scales = np.random.choice(RANDOS, size=nwalkers)
-    return initial + (scales[:, None] *  (pert) * 1e-3 * np.random.randn(nwalkers, ndim))
+   
+    initial = np.asarray(initial, dtype=float).ravel()
+    
+     # small safeguard against bugs of initial guesses being different dimensions than the parameter space explored
+    if initial.size != ndim:
+        raise ValueError("initial must have length ndim")
+
+    # Compute per-parameter standard deviation for jitter
+    stds = np.maximum(np.abs(initial), 1.0) * scale_frac
+    
+    stds = np.maximum(stds, min_std)  # ensure a floor
+
+    # Sample Gaussian jitter per parameter per walker
+    p0 = rng.normal(loc=initial, scale=stds, size=(nwalkers, ndim))
+
+    # If bounds given, clip into them
+    if param_bounds is not None:
+        if len(param_bounds) != ndim:
+            raise ValueError("param_bounds length must equal ndim")
+        for i, (low, high) in enumerate(param_bounds):
+            if low is not None:
+                p0[:, i] = np.maximum(p0[:, i], low)
+            if high is not None:
+                p0[:, i] = np.minimum(p0[:, i], high)
+
+    # Tiny safeguard: if any two rows (more than one walker have the same initial position in ndm space) are *exactly* identical, perturb slightly
+    # (prevents identical walker starts)
+    
+    _, uniq_idx = np.unique(np.round(p0, decimals=12), axis=0, return_index=True)
+    if uniq_idx.size < nwalkers:
+        # add tiny independent noise to duplicates
+        for i in range(nwalkers):
+            # if duplicated, add tiny jitter
+            if i not in uniq_idx:
+                
+                candidates = np.arange(-1, 1.1, 0.1)
+                candidates = candidates[candidates != 0.0]  # to remove zero
+                scale = random.choice(candidates) * 3.5e-6
+                p0[i] += rng.normal(scale=scale, size=ndim)
+
+    return p0
+
 
 
 def build_sampler(nwalkers, ndim, log_prob, pool, moves=None):
@@ -93,25 +159,42 @@ def save_chain(sampler, label, discard, thin):
         "acceptance_fraction_mean": float(np.mean(acc_frac)),
         "timestamp": time.asctime(),
     }
-    
+
+    # try adding tau and ESS
+    try:
+        tau = sampler.get_autocorr_time(quiet=True)
+        flat_chain = sampler.get_chain(discard=discard, flat=True, thin=thin)
+        N = flat_chain.shape[0]
+        ess = (N / tau).tolist()  # convert to list for JSON serialization
+
+        meta["autocorr_time"] = tau.tolist()
+        meta["ess_per_parameter"] = ess
+        meta["ess_min"] = float(np.min(ess))
+    except emcee.autocorr.AutocorrError:
+        meta["autocorr_time"] = None
+        meta["ess_per_parameter"] = None
+        meta["ess_min"] = None
+
     with open(prefix + "_meta.json", "w") as f:
         json.dump(meta, f, indent=2)
 
     print(f"Saved {label}: raw shape {chain.shape}, flat shape {flat.shape}", flush=True)
-    
+
     print(f"Acceptance mean = {np.mean(acc_frac):.3f}, "
           f"min = {np.min(acc_frac):.3f}, max = {np.max(acc_frac):.3f}", flush=True)
 
 
 def run_experiment(config):
     """Run a single MCMC experiment from config dict."""
+    
     ndim, nwalkers, nsteps, discard, thin = (
         config["ndim"], config["nwalkers"], config["nsteps"], config["discard"], config["thin"]
     )
     pos = prepare_initial_pos(np.array(config["initial"]), ndim, nwalkers)
+    
     log_prob = config["log_prob"]
 
-    with Pool(config.get("ncores", 30)) as pool:
+    with Pool(config.get("ncores", 32)) as pool:
         sampler = build_sampler(nwalkers, ndim, log_prob, pool, moves=config.get("moves"))
         try:
             run_with_progress(sampler, pos, nsteps, config["label"])
