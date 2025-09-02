@@ -123,7 +123,3 @@ class LogProb:
         if not np.isfinite(ll):
             return -np.inf
         return lp + ll
-
-    
-#REWRITE USING MONTEPYTHON
-#https://baudren.github.io/montepython.html
