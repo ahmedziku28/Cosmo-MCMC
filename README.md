@@ -22,7 +22,7 @@ After gaining HPC access, I reorganized the Colab code into proper Python module
 
 - `models.py` — interfaces with [CLASS](http://class-code.net/) (via `classy`) to compute cosmological observables:  
   - Luminosity distance for SNe (used as Distance Modulus)  
-  - BAO distance combinations ($D_M/r_s,\, D_H/r_s, \, D_V/r_s$)  
+  - BAO distance combinations ($ D_M/r_s, \, \, D_H/r_s, \, \, D_V/r_s $)  
 
 - `data_ext.py` — utilities to load the Pantheon+SH0ES SNe and DESI BAO datasets  
 
@@ -71,7 +71,7 @@ Three runs, defined in `experiments` dict are pre-wired:
   - `wa_fld = 0`  
   - fixed $\Omega_b = 0.048$ 
   - $\Omega_{cdm} = \Omega_m − \Omega_b$  
-  - dark energy: $\Omega_fld = 1 − \Omega_m$ (flatness assumption)  
+  - dark energy: $\Omega_{fld} = 1 − \Omega_m$ (flatness assumption)  
 
 - Parameter space kept relatively small: just ($\Omega_m$, h) or ($\Omega_m$, h, M), still physically realistic. 
 - Reduced Hubble constant **h** can be turned into $H_0$ by: $H_0$ = h × 100. 
