@@ -150,13 +150,9 @@ Figures from `analysis.ipynb` go into `plots/`.
 Please don't hesitate to contact me for questions, corrections or suggestions.
 
 
-### Affiliations
 
-|  |  |
-|--|--|
-| **NUT (HPC Cluster at BUE)** | <img src="https://github.com/user-attachments/assets/d88493d9-97cf-4a86-b1f8-055e5a8a34c8" width="250"/> |
-| **Centre for Theoretical Physics (BUE)** | <img src="https://github.com/user-attachments/assets/181f0a4a-6a1d-43b1-ae5c-68df0e983f10" width="250"/> |
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d88493d9-97cf-4a86-b1f8-055e5a8a34c8" width="300" style="background:white;padding:10px;"/>
+  <img src="https://github.com/user-attachments/assets/181f0a4a-6a1d-43b1-ae5c-68df0e983f10" width="300" style="background:white;padding:10px;"/>
+</p>
 
-
-
-) |
